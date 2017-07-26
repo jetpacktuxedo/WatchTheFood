@@ -4,7 +4,7 @@ import json
 import time
 
 import praw
-from prawcore.exceptions import RequestException
+from prawcore.exceptions import RequestException, ServerError
 import requests
 
 with open('keys.json') as keyfile:
@@ -15,7 +15,7 @@ REDDIT_CLIENT_SECRET = KEYS.get('reddit').get('client_secret')
 
 SLACK_WEBHOOK_URL = KEYS.get('slack').get('webhook_url')
 
-AT_USERS = 'platabear theaverageone perniciouspony jtm_sea'
+AT_USERS = ' '.join(KEYS.get('etf-notify'))
 
 REDDIT = praw.Reddit(
     client_id=REDDIT_CLIENT_ID,
@@ -23,7 +23,6 @@ REDDIT = praw.Reddit(
     user_agent='script:watchthefood:v0.1 (by /u/jetpacktuxedo)')
 
 
-@staticmethod
 def slack_post(message):
     '''Post message content to slack'''
     response = requests.post(
@@ -41,6 +40,8 @@ def check_reddit(redditor):
     try:
         return REDDIT.redditor(redditor).submissions.new().next()
     except RequestException:
+        return None
+    except SeverError:
         return None
 
 
